@@ -6,19 +6,22 @@ import myEpicNft from '../utils/MyEpicNFT.json';
 import { ethers } from 'ethers';
 import HashLoader from 'react-spinners/HashLoader';
 import Link from 'next/link';
+import opensea from '../assets/opensea.svg';
 
 // Constants
 const TWITTER_HANDLE = '_buildspace';
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 const OPENSEA_LINK = '';
 const TOTAL_MINT_COUNT = 50;
-const CONTRACT_ADDRESS = '0x5CDF68875aBA58c1Cc6a961DbB98dcD3D6bBB24C';
+const CONTRACT_ADDRESS = '0x1527F82cD39FF3289C0A05e883c315CF07c21b14';
 
 export default function Home() {
   const [currentAccount, setCurrentAccount] = useState("");
   const [loading, setLoading] = useState(false);
   const [testnetAddress, setTestnetAddress] = useState("");
   const [openseaAddress, setOpenseaAddress] = useState("");
+  const [mintCount, setMintCount] = useState(0);
+  const [correctNetwork, setCorrectNetwork] = useState(false);
 
  const checkIfWallectIsConnected = async () => {
   const { ethereum } = window;
@@ -31,6 +34,15 @@ export default function Home() {
   }
 
   const accounts = await ethereum.request({ method: 'eth_accounts' });
+  let chainId = await ethereum.request({ method: 'eth_chainId' });
+
+  console.log("Connected to chainId ", chainId);
+  const rinkebyChainId = "0x4";
+  if(chainId === rinkebyChainId) {
+    setCorrectNetwork(true);
+  } else {
+    setCorrectNetwork(false);
+  }
 
   if(accounts.length !== 0) {
     const account = accounts[0];
@@ -53,10 +65,37 @@ export default function Home() {
 
      const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
 
+     let chainId = await ethereum.request({ method: 'eth_chainId' });
+
+      console.log("Connected to chainId ", chainId);
+      const rinkebyChainId = "0x4";
+      if(chainId === rinkebyChainId) {
+        setCorrectNetwork(true);
+      } else {
+        setCorrectNetwork(false);
+      }
+
      console.log("Connected", accounts[0]);
      setCurrentAccount(accounts[0]);
 
      setupEventListener();
+   } catch (error) {
+     console.log(error)
+   }
+ }
+
+ const getNFTMintedCount = async () => {
+   try {
+     const { ethereum } = window;
+      if(ethereum){
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        const connectContract = new ethers.Contract(CONTRACT_ADDRESS, myEpicNft.abi, signer);
+        const count = await connectContract.getTotalNFTMinted();
+        setMintCount(count.toNumber());
+      } else {
+        console.log("No ethereum object found");
+      }
    } catch (error) {
      console.log(error)
    }
@@ -76,6 +115,12 @@ export default function Home() {
          setOpenseaAddress(`https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}`);
        });
 
+       ethereum.on('chainChanged', (chainId) => {
+        // console.log("Chain changed to ", chainId); 
+        chainId === '0x4' && getNFTMintedCount();
+        window.location.reload();
+      });
+
        console.log("Setup event listener");
      } else {
       console.log("Ethereum object doesn't exist!");
@@ -91,7 +136,6 @@ export default function Home() {
  }
 
  const askContractToMintNft = async () => {
-  setLoading(true);
   resetLinks();
    try {
      const { ethereum } = window;
@@ -110,16 +154,22 @@ export default function Home() {
        console.log(nftTxn)
        console.log(`Mined, see traction: https://rinkeby.etherscan.io/tx/${nftTxn.hash}`);
        setTestnetAddress(`https://rinkeby.etherscan.io/tx/${nftTxn.hash}`);
+
+       getNFTMintedCount();
      } else {
        console.log("No ethereum object found");
+       setLoading(false);
      }
    } catch (error) {
      console.log(error);
+     setLoading(false);
    }
  }
 
   const renderNotConnectedContainer = () => (
-    <button className="cta-button connect-wallet-button">
+    <button 
+      onClick={connectWallet}
+      className="cta-button connect-wallet-button">
       Connect to Wallet
     </button>
   );
@@ -127,6 +177,7 @@ export default function Home() {
   useEffect(() => {
     checkIfWallectIsConnected();
     resetLinks();
+    getNFTMintedCount();
   }, [])
 
   return (
@@ -134,7 +185,19 @@ export default function Home() {
       <div className="flex flex-col h-full justify-between">
         <div className="pt-[4rem]">
           <p className="header gradient-text">My NFT Collection</p>
-          
+          <Link href="https://testnets.opensea.io/collection/acushlanft-v3" >
+           <a target="_blank" rel="noopener noreferrer">
+             <button className="sub-header border flex items-center justify-center mx-auto px-3 py-1 rounded-lg gradient-text mb-4">
+               <Image src={opensea} alt="opensea" width={'20px'} height={'20px'} layout="fixed" /> 
+               <span className='ml-2'>See my Collections</span>
+              </button>
+             </a>
+          </Link>
+          {correctNetwork &&
+            <p className='text-2xl'>
+              <span className='text-gray-500 bg-green-100 px-4 text-center rounded-lg'> {mintCount} / 50 NFTs minted </span>
+            </p>
+          }
           <p className="sub-text">
             Each unique. Each beautiful. Discover your NFT today. 
           </p>
@@ -143,7 +206,8 @@ export default function Home() {
             (
               <button 
                 onClick={askContractToMintNft}
-                className="cta-button connect-wallet-button">
+                disabled={!correctNetwork}
+                className={`cta-button ${connectWallet ?'connect-bg':'bg-gray-600'} connect-wallet-button`}>
                 {loading ?
                   (
                   <>
@@ -151,7 +215,7 @@ export default function Home() {
                     <span className='pl-4'>Currently minting your NFT</span> 
                   </> 
                   ):
-                 "Mint NFT"
+                  correctNetwork ? "Mint NFT" : "Please connect to Rinkeby Testnet"
                 }
               </button>
             )
