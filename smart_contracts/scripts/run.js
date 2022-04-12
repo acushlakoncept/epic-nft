@@ -10,6 +10,15 @@ const main = async () => {
 
   txn = await nftContract.makeAnEpicNFT()
   await txn.wait()
+
+  txn = await nftContract.makeAnEpicNFT()
+  await txn.wait()
+
+  txn = await nftContract.makeAnEpicNFT()
+  await txn.wait()
+
+  const totalMinted = await nftContract.getTotalNFTMinted()
+  console.log(totalMinted.toNumber())
 }
 
 ;(async () => {

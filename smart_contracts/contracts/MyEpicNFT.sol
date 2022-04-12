@@ -13,6 +13,9 @@ contract MyEpicNFT is ERC721URIStorage {
   using Counters for Counters.Counter;
   Counters.Counter private _tokenIds;
 
+  uint private totalNftMinted;
+
+
   string baseSvg = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350"><defs><linearGradient id="a" x1="0%" y1="0%" x2="100%" y2="0%" gradientTransform="rotate(30)"><stop offset="0%" style="stop-color:#6ab1c8;stop-opacity:1"/><stop offset="100%" style="stop-color:#bde9fa;stop-opacity:1"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#a)"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" style="fill:&quot;#032a37&quot;;font-weight:700;font-family:tahoma;font-size:16px">';
 
   string baseSvgStart = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350"><defs><linearGradient id="a" x1="0%" y1="0%" x2="100%" y2="0%" gradientTransform="rotate(30)"><stop offset="0%" style="stop-color:';
@@ -67,8 +70,16 @@ contract MyEpicNFT is ERC721URIStorage {
     return uint256(keccak256(abi.encodePacked(input)));
   }
 
+  function getTotalNFTMinted() public view returns (uint) {
+    return totalNftMinted;
+  }
+
+  
+
 
   function makeAnEpicNFT() public {
+    require(totalNftMinted < 51, "NFT minted limit reached");
+
     uint256 newItemId = _tokenIds.current();
 
     string memory firstWord = pickRandomFirstWord(newItemId);
@@ -116,7 +127,10 @@ contract MyEpicNFT is ERC721URIStorage {
     _setTokenURI(newItemId, finalTokenUri);
     console.log("An NFT w/ ID %s has been minted to %s", newItemId, msg.sender);
 
+    console.log("Total minted:", totalNftMinted);
+
     _tokenIds.increment();
+    totalNftMinted++;
 
     NewEpicNFTMinted(msg.sender, newItemId);
 
