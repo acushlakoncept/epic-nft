@@ -13,3 +13,5 @@ npx hardhat node
 node scripts/sample-script.js
 npx hardhat help
 ```
+
+> Contract deployed to:  0xFAE302644E2920076b772bDad4804DEDA0161966
