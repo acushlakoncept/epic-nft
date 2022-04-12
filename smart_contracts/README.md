@@ -14,4 +14,6 @@ node scripts/sample-script.js
 npx hardhat help
 ```
 
-> Contract deployed to:  0xFAE302644E2920076b772bDad4804DEDA0161966
+> Contract deployed to:  0x0a4955DFE697C66012cAf9884D4205A3279a1775
+
+> npx hardhat verify YOUR_CONTRACT_ADDRESS --network rinkeby 

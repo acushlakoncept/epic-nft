@@ -9,11 +9,11 @@ import Link from 'next/link';
 import opensea from '../assets/opensea.svg';
 
 // Constants
-const TWITTER_HANDLE = '_buildspace';
+const TWITTER_HANDLE = 'acushlakoncept';
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 const OPENSEA_LINK = '';
 const TOTAL_MINT_COUNT = 50;
-const CONTRACT_ADDRESS = '0x1527F82cD39FF3289C0A05e883c315CF07c21b14';
+const CONTRACT_ADDRESS = '0x0a4955DFE697C66012cAf9884D4205A3279a1775';
 
 export default function Home() {
   const [currentAccount, setCurrentAccount] = useState("");
@@ -185,7 +185,7 @@ export default function Home() {
       <div className="flex flex-col h-full justify-between">
         <div className="pt-[4rem]">
           <p className="header gradient-text">My NFT Collection</p>
-          <Link href="https://testnets.opensea.io/collection/acushlanft-v3" >
+          <Link href="https://testnets.opensea.io/collection/acushlanft-v4" >
            <a target="_blank" rel="noopener noreferrer">
              <button className="sub-header border flex items-center justify-center mx-auto px-3 py-1 rounded-lg gradient-text mb-4">
                <Image src={opensea} alt="opensea" width={'20px'} height={'20px'} layout="fixed" /> 
